@@ -452,7 +452,7 @@
         // Store selected images
         let selectedImages = [];
 
-        // Your n8n webhook URL - CORRECTED
+        // Your n8n webhook URL
         const WEBHOOK_URL = 'https://drew721.app.n8n.cloud/webhook/ai-agent-endpoint';
 
         // Handle image selection
@@ -648,7 +648,7 @@
                     formData.append(`image_${index}`, img.file);
                 });
 
-                // Send to n8n webhook - using corrected URL
+                // Send to n8n webhook
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     body: formData
@@ -663,10 +663,12 @@
                 // Remove typing indicator
                 removeTypingIndicator();
                 
-                // Add bot response - handle different response formats
+                // ----- FIXED: handle "result" field -----
                 let botResponse = '';
                 if (typeof data === 'string') {
                     botResponse = data;
+                } else if (data.result) {          // <-- Added this line
+                    botResponse = data.result;      // <-- Added this line
                 } else if (data.output) {
                     botResponse = data.output;
                 } else if (data.message) {
