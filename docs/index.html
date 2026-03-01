@@ -5,22 +5,251 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Automation Interface</title>
     <style>
-        /* All your existing CSS plus new styles for images */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #495057;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #868e96;
+            font-size: 16px;
+        }
+
+        .chat-container {
+            padding: 30px;
+            background: white;
+        }
+
+        .messages {
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .user-message .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message .message-content {
+            background: #f1f3f5;
+            color: #495057;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
         .message-image {
-            max-width: 100%;
+            max-width: 200px;
             max-height: 200px;
             border-radius: 8px;
-            margin-top: 8px;
             cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
         }
-        
+
+        .user-message .message-image {
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .message-image:hover {
+            transform: scale(1.05);
+        }
+
+        .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .user-message .file-attachment {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .file-icon {
+            font-size: 16px;
+        }
+
+        .file-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: #adb5bd;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .user-message .timestamp {
+            text-align: right;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-direction: column;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            font-family: inherit;
+            min-height: 60px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .input-tools {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-width: 100px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
         .image-preview-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
             padding: 10px;
-            background: #f8f9fa;
+            background: #e9ecef;
             border-radius: 8px;
         }
         
@@ -41,7 +270,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background: red;
+            background: #dc3545;
             color: white;
             border-radius: 50%;
             width: 20px;
@@ -51,61 +280,150 @@
             justify-content: center;
             cursor: pointer;
             font-size: 12px;
+            font-weight: bold;
         }
-        
-        .attachment-btn {
-            background: #6c757d;
-            padding: 12px;
+
+        .remove-image:hover {
+            background: #c82333;
+        }
+
+        .status {
+            padding: 10px 20px;
+            background: #e7f5ff;
+            color: #1864ab;
             border-radius: 8px;
-            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
         }
-        
-        .input-tools {
+
+        .status.active {
+            display: block;
+        }
+
+        .workflow-info {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
             display: flex;
-            gap: 10px;
-            align-items: flex-start;
+            gap: 20px;
+            color: #868e96;
+            font-size: 13px;
+        }
+
+        .workflow-info span {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+            background: #f1f3f5;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #868e96;
+            border-radius: 50%;
+            animation: typing 1s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <button class="modal-close">&times;</button>
+        <img id="modalImage" src="" alt="Enlarged view">
+    </div>
+
     <div class="container">
-        <!-- Same header -->
         <div class="header">
             <h1>AI Automation Interface</h1>
-            <p>Connected to n8n workflow: hg6VSygEyuTAzwiE</p>
+            <p>Connected to n8n workflow: AI Assistant</p>
         </div>
 
         <div class="chat-container">
             <div class="messages" id="messages">
                 <div class="message bot-message">
-                    <div class="message-content">
-                        Hello! I'm your AI assistant. I can handle both text and images. How can I help you today?
+                    <div class="message-wrapper">
+                        <div class="message-content">
+                            Hello! I'm your AI assistant. I can handle both text and images. How can I help you today?
+                        </div>
+                        <div class="timestamp">Just now</div>
                     </div>
-                    <div class="timestamp">Just now</div>
                 </div>
             </div>
 
-            <!-- Enhanced input area with image support -->
             <div class="input-area">
-                <div style="flex: 1;">
+                <div class="image-preview-container" id="imagePreviewContainer" style="display: none;"></div>
+                
+                <div class="input-row">
                     <textarea 
                         id="userInput" 
                         placeholder="Type your message here..." 
                         rows="3"
                     ></textarea>
                     
-                    <!-- Image preview area -->
-                    <div id="imagePreviewContainer" class="image-preview-container" style="display: none;"></div>
-                </div>
-                
-                <div class="input-tools">
-                    <!-- Image attachment button -->
-                    <label class="attachment-btn" style="cursor: pointer;">
-                        📷
-                        <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelect(event)">
-                    </label>
-                    
-                    <button id="sendButton" onclick="sendMessage()">Send</button>
+                    <div class="input-tools">
+                        <label class="tool-btn" title="Attach images">
+                            📷
+                            <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelect(event)">
+                        </label>
+                        <button id="sendButton" onclick="sendMessage()">Send</button>
+                    </div>
                 </div>
             </div>
 
@@ -117,7 +435,7 @@
         <div class="workflow-info">
             <div>🔄 Workflow: <span>AI Agent</span></div>
             <div>⚡ Status: <span id="workflowStatus">Connected</span></div>
-            <div>🆔 Execution ID: <span>120</span></div>
+            <div>🆔 Latest Execution: <span>Ready</span></div>
         </div>
     </div>
 
@@ -127,15 +445,18 @@
         const sendButton = document.getElementById('sendButton');
         const status = document.getElementById('status');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imageInput = document.getElementById('imageInput');
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
         
         // Store selected images
         let selectedImages = [];
 
-        // Your n8n webhook URL
-        const WEBHOOK_URL = 'https://drew721.app.n8n.cloud/webhook/hg6VSygEyuTAzwiE';
+        // Your n8n webhook URL - CORRECTED
+        const WEBHOOK_URL = 'https://drew721.app.n8n.cloud/webhook/ai-agent-endpoint';
 
         // Handle image selection
-        function handleImageSelect(event) {
+        window.handleImageSelect = (event) => {
             const files = Array.from(event.target.files);
             
             files.forEach(file => {
@@ -145,14 +466,18 @@
                         selectedImages.push({
                             file: file,
                             dataUrl: e.target.result,
-                            name: file.name
+                            name: file.name,
+                            size: file.size
                         });
                         updateImagePreviews();
                     };
                     reader.readAsDataURL(file);
                 }
             });
-        }
+            
+            // Clear input to allow selecting same file again
+            imageInput.value = '';
+        };
 
         // Update image previews
         function updateImagePreviews() {
@@ -164,7 +489,7 @@
                     const preview = document.createElement('div');
                     preview.className = 'image-preview';
                     preview.innerHTML = `
-                        <img src="${img.dataUrl}" alt="Preview">
+                        <img src="${img.dataUrl}" alt="${img.name}" onclick="openModal('${img.dataUrl}')">
                         <div class="remove-image" onclick="removeImage(${index})">×</div>
                     `;
                     imagePreviewContainer.appendChild(preview);
@@ -180,41 +505,112 @@
             updateImagePreviews();
         };
 
-        function addMessage(content, isUser = false, images = []) {
+        // Open image modal
+        window.openModal = (imageUrl) => {
+            modalImage.src = imageUrl;
+            modal.classList.add('active');
+        };
+
+        // Close modal
+        window.closeModal = () => {
+            modal.classList.remove('active');
+            modalImage.src = '';
+        };
+
+        // Close modal with escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // Add message to chat
+        function addMessage(content, isUser = false, files = []) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
             
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
             
-            // Add text content
+            // Add text content if exists
             if (content) {
-                const textDiv = document.createElement('div');
-                textDiv.textContent = content;
-                messageContent.appendChild(textDiv);
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = content;
+                wrapper.appendChild(contentDiv);
             }
             
-            // Add images if any
-            if (images.length > 0) {
-                images.forEach(imgData => {
-                    const img = document.createElement('img');
-                    img.src = imgData.dataUrl || imgData;
-                    img.className = 'message-image';
-                    img.onclick = () => window.open(img.src, '_blank');
-                    messageContent.appendChild(img);
-                });
+            // Add file attachments
+            if (files.length > 0) {
+                // Separate images from other files
+                const images = files.filter(f => f.type?.startsWith('image/') || f.dataUrl);
+                const otherFiles = files.filter(f => !f.type?.startsWith('image/') && !f.dataUrl);
+                
+                // Add images
+                if (images.length > 0) {
+                    const imagesDiv = document.createElement('div');
+                    imagesDiv.className = 'message-images';
+                    
+                    images.forEach(img => {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = img.dataUrl || img;
+                        imgElement.className = 'message-image';
+                        imgElement.onclick = () => openModal(imgElement.src);
+                        imagesDiv.appendChild(imgElement);
+                    });
+                    
+                    wrapper.appendChild(imagesDiv);
+                }
+                
+                // Add other files as attachments
+                if (otherFiles.length > 0) {
+                    otherFiles.forEach(file => {
+                        const attachmentDiv = document.createElement('div');
+                        attachmentDiv.className = 'file-attachment';
+                        attachmentDiv.innerHTML = `
+                            <span class="file-icon">📎</span>
+                            <span class="file-name">${file.name || 'Attachment'}</span>
+                            <span class="file-size">${file.size ? `(${Math.round(file.size/1024)} KB)` : ''}</span>
+                        `;
+                        wrapper.appendChild(attachmentDiv);
+                    });
+                }
             }
             
             const timestamp = document.createElement('div');
             timestamp.className = 'timestamp';
-            timestamp.textContent = new Date().toLocaleTimeString();
+            timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            messageDiv.appendChild(messageContent);
-            messageDiv.appendChild(timestamp);
+            wrapper.appendChild(timestamp);
+            messageDiv.appendChild(wrapper);
             messagesContainer.appendChild(messageDiv);
             
             // Scroll to bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'message bot-message';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            messagesContainer.appendChild(indicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
         }
 
         async function sendMessage() {
@@ -228,14 +624,17 @@
             sendButton.disabled = true;
             status.classList.add('active');
 
-            // Add user message with images
-            addMessage(message, true, selectedImages.map(img => ({ dataUrl: img.dataUrl })));
+            // Add user message with files
+            addMessage(message, true, selectedImages);
             
             // Clear input
             userInput.value = '';
             const imagesToSend = [...selectedImages];
             selectedImages = [];
             updateImagePreviews();
+
+            // Show typing indicator
+            showTypingIndicator();
 
             try {
                 // Prepare form data for images
@@ -249,10 +648,10 @@
                     formData.append(`image_${index}`, img.file);
                 });
 
-                // Send to n8n webhook
+                // Send to n8n webhook - using corrected URL
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    body: formData  // Using FormData for file upload
+                    body: formData
                 });
 
                 if (!response.ok) {
@@ -261,12 +660,30 @@
 
                 const data = await response.json();
                 
-                // Add bot response
-                const botResponse = data.output || data.message || data.response || 'Received your message!';
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                // Add bot response - handle different response formats
+                let botResponse = '';
+                if (typeof data === 'string') {
+                    botResponse = data;
+                } else if (data.output) {
+                    botResponse = data.output;
+                } else if (data.message) {
+                    botResponse = data.message;
+                } else if (data.response) {
+                    botResponse = data.response;
+                } else if (data.text) {
+                    botResponse = data.text;
+                } else {
+                    botResponse = JSON.stringify(data, null, 2);
+                }
+                
                 addMessage(botResponse);
 
             } catch (error) {
                 console.error('Error:', error);
+                removeTypingIndicator();
                 addMessage('Sorry, there was an error processing your request. Please try again.');
             } finally {
                 // Re-enable input and button
@@ -287,6 +704,9 @@
 
         // Initial focus
         userInput.focus();
+
+        // Update workflow info with execution ID
+        document.querySelector('.workflow-info span:last-child').textContent = 'Ready';
     </script>
 </body>
 </html>
