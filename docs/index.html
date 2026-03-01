@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automation Interface</title>
+    <style>
+        /* All your existing CSS plus new styles for images */
+        .message-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .attachment-btn {
+            background: #6c757d;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .input-tools {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Same header -->
+        <div class="header">
+            <h1>AI Automation Interface</h1>
+            <p>Connected to n8n workflow: hg6VSygEyuTAzwiE</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        Hello! I'm your AI assistant. I can handle both text and images. How can I help you today?
+                    </div>
+                    <div class="timestamp">Just now</div>
+                </div>
+            </div>
+
+            <!-- Enhanced input area with image support -->
+            <div class="input-area">
+                <div style="flex: 1;">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="Type your message here..." 
+                        rows="3"
+                    ></textarea>
+                    
+                    <!-- Image preview area -->
+                    <div id="imagePreviewContainer" class="image-preview-container" style="display: none;"></div>
+                </div>
+                
+                <div class="input-tools">
+                    <!-- Image attachment button -->
+                    <label class="attachment-btn" style="cursor: pointer;">
+                        📷
+                        <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelect(event)">
+                    </label>
+                    
+                    <button id="sendButton" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="status" id="status">
+                Processing your request...
+            </div>
+        </div>
+
+        <div class="workflow-info">
+            <div>🔄 Workflow: <span>AI Agent</span></div>
+            <div>⚡ Status: <span id="workflowStatus">Connected</span></div>
+            <div>🆔 Execution ID: <span>120</span></div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const status = document.getElementById('status');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        
+        // Store selected images
+        let selectedImages = [];
+
+        // Your n8n webhook URL
+        const WEBHOOK_URL = 'https://drew721.app.n8n.cloud/webhook/hg6VSygEyuTAzwiE';
+
+        // Handle image selection
+        function handleImageSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        selectedImages.push({
+                            file: file,
+                            dataUrl: e.target.result,
+                            name: file.name
+                        });
+                        updateImagePreviews();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Update image previews
+        function updateImagePreviews() {
+            if (selectedImages.length > 0) {
+                imagePreviewContainer.style.display = 'flex';
+                imagePreviewContainer.innerHTML = '';
+                
+                selectedImages.forEach((img, index) => {
+                    const preview = document.createElement('div');
+                    preview.className = 'image-preview';
+                    preview.innerHTML = `
+                        <img src="${img.dataUrl}" alt="Preview">
+                        <div class="remove-image" onclick="removeImage(${index})">×</div>
+                    `;
+                    imagePreviewContainer.appendChild(preview);
+                });
+            } else {
+                imagePreviewContainer.style.display = 'none';
+            }
+        }
+
+        // Remove image
+        window.removeImage = (index) => {
+            selectedImages.splice(index, 1);
+            updateImagePreviews();
+        };
+
+        function addMessage(content, isUser = false, images = []) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Add text content
+            if (content) {
+                const textDiv = document.createElement('div');
+                textDiv.textContent = content;
+                messageContent.appendChild(textDiv);
+            }
+            
+            // Add images if any
+            if (images.length > 0) {
+                images.forEach(imgData => {
+                    const img = document.createElement('img');
+                    img.src = imgData.dataUrl || imgData;
+                    img.className = 'message-image';
+                    img.onclick = () => window.open(img.src, '_blank');
+                    messageContent.appendChild(img);
+                });
+            }
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            messageDiv.appendChild(messageContent);
+            messageDiv.appendChild(timestamp);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            // Check if there's anything to send
+            if (!message && selectedImages.length === 0) return;
+
+            // Disable input and button
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            status.classList.add('active');
+
+            // Add user message with images
+            addMessage(message, true, selectedImages.map(img => ({ dataUrl: img.dataUrl })));
+            
+            // Clear input
+            userInput.value = '';
+            const imagesToSend = [...selectedImages];
+            selectedImages = [];
+            updateImagePreviews();
+
+            try {
+                // Prepare form data for images
+                const formData = new FormData();
+                formData.append('message', message);
+                formData.append('timestamp', new Date().toISOString());
+                formData.append('sessionId', 'user-session-1');
+                
+                // Append images
+                imagesToSend.forEach((img, index) => {
+                    formData.append(`image_${index}`, img.file);
+                });
+
+                // Send to n8n webhook
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData  // Using FormData for file upload
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Add bot response
+                const botResponse = data.output || data.message || data.response || 'Received your message!';
+                addMessage(botResponse);
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your request. Please try again.');
+            } finally {
+                // Re-enable input and button
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                status.classList.remove('active');
+                userInput.focus();
+            }
+        }
+
+        // Allow Enter key to send (but Shift+Enter for new line)
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initial focus
+        userInput.focus();
+    </script>
+</body>
+</html>
