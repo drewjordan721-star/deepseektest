@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>AI Automation Interface</title>
     <style>
         * {
@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
@@ -25,46 +25,59 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
             background: #f8f9fa;
-            padding: 30px;
+            padding: 15px 20px;
             border-bottom: 1px solid #e9ecef;
+            flex-shrink: 0;
         }
 
         .header h1 {
             color: #495057;
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 5px;
         }
 
         .header p {
             color: #868e96;
-            font-size: 16px;
+            font-size: 13px;
         }
 
         .chat-container {
-            padding: 30px;
+            padding: 15px;
             background: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .messages {
-            min-height: 400px;
-            max-height: 500px;
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 20px;
-            padding: 10px;
+            padding: 10px 5px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            min-height: 0;
         }
 
         .message {
             display: flex;
             flex-direction: column;
-            max-width: 80%;
+            max-width: 85%;
             animation: fadeIn 0.3s ease;
+        }
+
+        @media (max-width: 480px) {
+            .message {
+                max-width: 90%;
+            }
         }
 
         @keyframes fadeIn {
@@ -86,7 +99,7 @@
         }
 
         .message-content {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
             font-size: 14px;
             line-height: 1.4;
@@ -108,17 +121,26 @@
         .message-images {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 5px;
+            margin-top: 5px;
         }
 
         .message-image {
-            max-width: 200px;
-            max-height: 200px;
+            width: 100%;
+            max-width: 150px;
+            max-height: 150px;
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s;
             border: 2px solid transparent;
+            object-fit: cover;
+        }
+
+        @media (max-width: 480px) {
+            .message-image {
+                max-width: 120px;
+                max-height: 120px;
+            }
         }
 
         .user-message .message-image {
@@ -132,12 +154,12 @@
         .file-attachment {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            gap: 6px;
+            padding: 6px 10px;
             background: rgba(0,0,0,0.05);
             border-radius: 8px;
             margin-top: 5px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .user-message .file-attachment {
@@ -146,7 +168,7 @@
         }
 
         .file-icon {
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .file-name {
@@ -157,10 +179,10 @@
         }
 
         .timestamp {
-            font-size: 11px;
+            font-size: 10px;
             color: #adb5bd;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            margin-top: 3px;
+            margin-bottom: 3px;
         }
 
         .user-message .timestamp {
@@ -169,28 +191,30 @@
 
         .input-area {
             display: flex;
-            gap: 10px;
-            padding: 20px;
+            gap: 8px;
+            padding: 12px;
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 12px;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .input-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: flex-end;
         }
 
         textarea {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             font-size: 14px;
             resize: none;
             font-family: inherit;
-            min-height: 60px;
+            min-height: 40px;
+            max-height: 100px;
         }
 
         textarea:focus {
@@ -200,20 +224,22 @@
 
         .input-tools {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .tool-btn {
             background: white;
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             cursor: pointer;
             font-size: 18px;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 44px;
+            height: 44px;
         }
 
         .tool-btn:hover {
@@ -222,7 +248,7 @@
         }
 
         button {
-            padding: 12px 24px;
+            padding: 10px 18px;
             background: #007bff;
             color: white;
             border: none;
@@ -231,7 +257,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
-            min-width: 100px;
+            min-width: 70px;
+            height: 44px;
         }
 
         button:hover {
@@ -246,17 +273,20 @@
         .image-preview-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 10px;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 8px;
             background: #e9ecef;
             border-radius: 8px;
+            max-height: 100px;
+            overflow-y: auto;
         }
         
         .image-preview {
             position: relative;
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
         }
         
         .image-preview img {
@@ -273,13 +303,13 @@
             background: #dc3545;
             color: white;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
@@ -288,12 +318,12 @@
         }
 
         .status {
-            padding: 10px 20px;
+            padding: 8px 12px;
             background: #e7f5ff;
             color: #1864ab;
             border-radius: 8px;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 13px;
             display: none;
         }
 
@@ -302,13 +332,21 @@
         }
 
         .workflow-info {
-            padding: 20px 30px;
+            padding: 12px 15px;
             background: #f8f9fa;
             border-top: 1px solid #e9ecef;
             display: flex;
-            gap: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
             color: #868e96;
-            font-size: 13px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .workflow-info div {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .workflow-info span {
@@ -318,8 +356,8 @@
 
         .typing-indicator {
             display: flex;
-            gap: 5px;
-            padding: 12px 16px;
+            gap: 4px;
+            padding: 10px 14px;
             background: #f1f3f5;
             border-radius: 18px;
             border-bottom-left-radius: 4px;
@@ -327,8 +365,8 @@
         }
 
         .typing-indicator span {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: #868e96;
             border-radius: 50%;
             animation: typing 1s infinite ease-in-out;
@@ -344,7 +382,7 @@
 
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
+            30% { transform: translateY(-8px); }
         }
 
         .modal {
@@ -365,21 +403,76 @@
         }
 
         .modal img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
             object-fit: contain;
         }
 
         .modal-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             color: white;
             font-size: 30px;
             cursor: pointer;
             background: none;
             border: none;
             padding: 10px;
+            z-index: 1001;
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                height: calc(100vh - 10px);
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header p {
+                font-size: 12px;
+            }
+            
+            .message-content {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            
+            .input-area {
+                padding: 8px;
+            }
+            
+            textarea {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            .tool-btn {
+                width: 40px;
+                height: 40px;
+                padding: 8px;
+                font-size: 16px;
+            }
+            
+            button {
+                height: 40px;
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: 60px;
+            }
+            
+            .workflow-info {
+                padding: 8px 12px;
+                font-size: 11px;
+                gap: 8px;
+            }
         }
     </style>
 </head>
@@ -414,7 +507,7 @@
                     <textarea 
                         id="userInput" 
                         placeholder="Type your message here..." 
-                        rows="3"
+                        rows="2"
                     ></textarea>
                     
                     <div class="input-tools">
@@ -452,8 +545,8 @@
         // Store selected images
         let selectedImages = [];
 
-        // Your n8n webhook URL
-        const WEBHOOK_URL = 'https://drew721.app.n8n.cloud/webhook/ai-agent-endpoint';
+        // Updated webhook URL - changed from drew721 to temp721
+        const WEBHOOK_URL = 'https://temp721.app.n8n.cloud/webhook/ai-agent-endpoint';
 
         // Handle image selection
         window.handleImageSelect = (event) => {
@@ -533,7 +626,7 @@
             wrapper.className = 'message-wrapper';
             
             // Add text content if exists
-            if (content) {
+            if (content && content.trim() !== '') {
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
                 contentDiv.textContent = content;
@@ -648,7 +741,7 @@
                     formData.append(`image_${index}`, img.file);
                 });
 
-                // Send to n8n webhook
+                // Send to n8n webhook with updated URL
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     body: formData
@@ -659,26 +752,38 @@
                 }
 
                 const data = await response.json();
+                console.log('Raw response from webhook:', data);
                 
                 // Remove typing indicator
                 removeTypingIndicator();
                 
-                // ----- FIXED: handle "result" field -----
+                // Handle case where data is a JSON string that needs parsing
+                let responseData = data;
+                if (typeof data === 'string' && (data.trim().startsWith('{') || data.trim().startsWith('['))) {
+                    try {
+                        responseData = JSON.parse(data);
+                        console.log('Parsed JSON string:', responseData);
+                    } catch (e) {
+                        console.log('Not a JSON string, keeping as is');
+                    }
+                }
+                
+                // Extract the response text
                 let botResponse = '';
-                if (typeof data === 'string') {
-                    botResponse = data;
-                } else if (data.result) {          // <-- Added this line
-                    botResponse = data.result;      // <-- Added this line
-                } else if (data.output) {
-                    botResponse = data.output;
-                } else if (data.message) {
-                    botResponse = data.message;
-                } else if (data.response) {
-                    botResponse = data.response;
-                } else if (data.text) {
-                    botResponse = data.text;
+                if (typeof responseData === 'string') {
+                    botResponse = responseData;
+                } else if (responseData.result) {
+                    botResponse = responseData.result;
+                } else if (responseData.output) {
+                    botResponse = responseData.output;
+                } else if (responseData.message) {
+                    botResponse = responseData.message;
+                } else if (responseData.response) {
+                    botResponse = responseData.response;
+                } else if (responseData.text) {
+                    botResponse = responseData.text;
                 } else {
-                    botResponse = JSON.stringify(data, null, 2);
+                    botResponse = JSON.stringify(responseData, null, 2);
                 }
                 
                 addMessage(botResponse);
@@ -707,7 +812,13 @@
         // Initial focus
         userInput.focus();
 
-        // Update workflow info with execution ID
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Update workflow info
         document.querySelector('.workflow-info span:last-child').textContent = 'Ready';
     </script>
 </body>
