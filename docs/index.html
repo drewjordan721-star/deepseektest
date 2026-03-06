@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #2b2f3a;  /* Dark background for eye care */
+            background: #2b2f3a;
             min-height: 100vh;
             padding: 12px;
         }
@@ -21,7 +21,7 @@
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            background: #1e2229;  /* Dark container background */
+            background: #1e2229;
             border-radius: 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             overflow: hidden;
@@ -32,21 +32,21 @@
         }
 
         .header {
-            background: #252a33;  /* Dark header */
+            background: #252a33;
             padding: 20px 25px;
             border-bottom: 1px solid #3a4050;
             flex-shrink: 0;
         }
 
         .header h1 {
-            color: #e6e9f0;  /* Light text for contrast */
+            color: #e6e9f0;
             font-size: 32px;
             margin-bottom: 8px;
             font-weight: 600;
         }
 
         .header p {
-            color: #aab3c5;  /* Softer light text */
+            color: #aab3c5;
             font-size: 18px;
         }
 
@@ -119,27 +119,32 @@
         .message-content {
             padding: 18px 22px;
             border-radius: 24px;
-            font-size: 20px;  /* Increased font size */
-            line-height: 1.6;  /* Better line spacing for readability */
+            font-size: 20px;
+            line-height: 1.6;
             word-wrap: break-word;
             font-weight: 400;
-            white-space: pre-wrap;  /* Preserves line breaks and spacing */
+            white-space: pre-wrap;
             font-family: inherit;
         }
 
-        /* Dark mode colors with better contrast */
         .user-message .message-content {
-            background: #2b4b6f;  /* Darker blue for dark mode */
-            color: #f0f4fa;  /* Light text */
+            background: #2b4b6f;
+            color: #f0f4fa;
             border-bottom-right-radius: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .bot-message .message-content {
-            background: #2f3542;  /* Dark gray-blue */
-            color: #e6eaf0;  /* Light text */
+            background: #2f3542;
+            color: #e6eaf0;
             border-bottom-left-radius: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Pending user message style */
+        .user-message.pending .message-content {
+            opacity: 0.7;
+            background: #1f3a4f;
         }
 
         .message-images {
@@ -179,7 +184,7 @@
             justify-content: flex-end;
         }
 
-        .retry-btn {
+        .retry-btn, .copy-btn {
             background: #3a4050;
             border: 1px solid #4a5568;
             border-radius: 20px;
@@ -194,9 +199,13 @@
             align-self: flex-start;
         }
 
-        .retry-btn:hover {
+        .retry-btn:hover, .copy-btn:hover {
             background: #4a5568;
             color: white;
+        }
+
+        .copy-btn {
+            margin-left: auto;
         }
 
         .file-attachment {
@@ -235,7 +244,7 @@
 
         .timestamp {
             font-size: 14px;
-            color: #8a95aa;  /* Lighter for dark mode */
+            color: #8a95aa;
             margin-top: 6px;
             margin-bottom: 4px;
             font-weight: 400;
@@ -268,7 +277,7 @@
             padding: 18px 20px;
             border: 2px solid #3a4050;
             border-radius: 18px;
-            font-size: 20px;  /* Larger font */
+            font-size: 20px;
             resize: none;
             font-family: inherit;
             min-height: 70px;
@@ -519,7 +528,7 @@
             background: rgba(50, 55, 70, 0.9);
         }
 
-        /* Mobile-specific adjustments */
+        /* Mobile adjustments */
         @media (max-width: 600px) {
             body {
                 padding: 8px;
@@ -590,13 +599,12 @@
                 padding: 12px 16px;
             }
             
-            .retry-btn {
+            .retry-btn, .copy-btn {
                 font-size: 15px;
                 padding: 6px 14px;
             }
         }
 
-        /* Extra small devices */
         @media (max-width: 380px) {
             .message-content {
                 font-size: 18px;
@@ -648,7 +656,7 @@
                 <div class="input-row">
                     <textarea 
                         id="userInput" 
-                        placeholder="Type your message here... (Shift+Enter for new line)" 
+                        placeholder="Type your message here... (↩️ for new line)" 
                         rows="2"
                     ></textarea>
                     
@@ -684,12 +692,11 @@
         const modal = document.getElementById('imageModal');
         const modalImage = document.getElementById('modalImage');
         
-        // Store selected images and pending message
+        // Store selected images
         let selectedImages = [];
-        let pendingMessage = ''; // Store message if send fails
 
         // Updated webhook URL
-        const WEBHOOK_URL = 'https://temp721.app.n8n.cloud/webhook/ai-agent-endpoint';
+        const WEBHOOK_URL = 'https://hen721.app.n8n.cloud/webhook/ai-agent-endpoint';
 
         // Handle image selection
         window.handleImageSelect = (event) => {
@@ -711,7 +718,6 @@
                 }
             });
             
-            // Clear input to allow selecting same file again
             imageInput.value = '';
         };
 
@@ -753,17 +759,19 @@
             modalImage.src = '';
         };
 
-        // Close modal with escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 closeModal();
             }
         });
 
-        // Add message to chat with retry button
-        function addMessage(content, isUser = false, files = [], messageId = null, showRetry = false) {
+        // Add message to chat
+        function addMessage(content, isUser = false, files = [], messageId = null, isPending = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (isPending) {
+                messageDiv.classList.add('pending');
+            }
             if (messageId) {
                 messageDiv.dataset.messageId = messageId;
             }
@@ -771,26 +779,22 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
             
-            // Add text content if exists - use innerHTML to preserve line breaks
+            // Add text content
             if (content && content.trim() !== '') {
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
-                // Use innerHTML to preserve line breaks and convert them to <br>
                 contentDiv.innerHTML = content.replace(/\n/g, '<br>').replace(/ /g, ' ');
                 wrapper.appendChild(contentDiv);
             }
             
             // Add file attachments
             if (files && files.length > 0) {
-                // Separate images from other files
                 const images = files.filter(f => f.type?.startsWith('image/') || f.dataUrl);
                 const otherFiles = files.filter(f => !f.type?.startsWith('image/') && !f.dataUrl);
                 
-                // Add images
                 if (images.length > 0) {
                     const imagesDiv = document.createElement('div');
                     imagesDiv.className = 'message-images';
-                    
                     images.forEach(img => {
                         const imgElement = document.createElement('img');
                         imgElement.src = img.dataUrl || img;
@@ -798,11 +802,9 @@
                         imgElement.onclick = () => openModal(imgElement.src);
                         imagesDiv.appendChild(imgElement);
                     });
-                    
                     wrapper.appendChild(imagesDiv);
                 }
                 
-                // Add other files as attachments
                 if (otherFiles.length > 0) {
                     otherFiles.forEach(file => {
                         const attachmentDiv = document.createElement('div');
@@ -820,46 +822,61 @@
             const timestamp = document.createElement('div');
             timestamp.className = 'timestamp';
             timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
             wrapper.appendChild(timestamp);
             
-            // Add retry button for failed messages or user messages
-            if (showRetry && isUser) {
+            // Add copy button for bot messages (only if not pending and content exists)
+            if (!isUser && content && !isPending) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'message-actions';
                 
-                const retryBtn = document.createElement('button');
-                retryBtn.className = 'retry-btn';
-                retryBtn.innerHTML = '↻ Retry';
-                retryBtn.onclick = () => retryMessage(content, files, messageId);
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '📋 Copy';
+                copyBtn.onclick = () => copyToClipboard(content);
                 
-                actionsDiv.appendChild(retryBtn);
+                actionsDiv.appendChild(copyBtn);
                 wrapper.appendChild(actionsDiv);
+            }
+            
+            // Add retry button for failed user messages
+            if (isUser && messageId && !isPending && content === '') { // Only for failed messages (we'll handle separately)
+                // This will be added in error case
             }
             
             messageDiv.appendChild(wrapper);
             messagesContainer.appendChild(messageDiv);
-            
-            // Scroll to bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
             return messageDiv;
         }
 
-        // Retry a failed message
+        // Copy to clipboard function
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                // Show temporary feedback
+                const copyBtn = event.target;
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✓ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+
+        // Retry function
         async function retryMessage(content, files, messageId) {
-            // Remove the old message
             const oldMessage = document.querySelector(`[data-message-id="${messageId}"]`);
             if (oldMessage) {
                 oldMessage.remove();
             }
             
-            // Set the pending content
             userInput.value = content;
             selectedImages = files ? [...files] : [];
             updateImagePreviews();
             
-            // Auto-send after a short delay
             setTimeout(() => {
                 sendMessage();
             }, 100);
@@ -881,7 +898,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Remove typing indicator
         function removeTypingIndicator() {
             const indicator = document.getElementById('typingIndicator');
             if (indicator) {
@@ -893,7 +909,6 @@
             const message = userInput.value;
             const imagesToSend = [...selectedImages];
             
-            // Check if there's anything to send
             if (!message.trim() && imagesToSend.length === 0) return;
 
             // Disable input and button
@@ -901,30 +916,28 @@
             sendButton.disabled = true;
             status.classList.add('active');
 
-            // Generate unique ID for this message
             const messageId = Date.now().toString();
 
-            // Clear input and previews immediately
+            // Immediately show user message with pending state
+            addMessage(message, true, imagesToSend, messageId, true);
+
+            // Clear input and previews
             userInput.value = '';
             selectedImages = [];
             updateImagePreviews();
 
             try {
-                // Prepare form data for images
                 const formData = new FormData();
                 formData.append('message', message);
                 formData.append('timestamp', new Date().toISOString());
                 formData.append('sessionId', 'user-session-1');
                 
-                // Append images
                 imagesToSend.forEach((img, index) => {
                     formData.append(`image_${index}`, img.file);
                 });
 
-                // Show typing indicator
                 showTypingIndicator();
 
-                // Send to n8n webhook
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     body: formData
@@ -935,23 +948,16 @@
                 }
 
                 const data = await response.json();
-                console.log('Raw response from webhook:', data);
                 
-                // Remove typing indicator
                 removeTypingIndicator();
                 
-                // Handle case where data is a JSON string that needs parsing
                 let responseData = data;
                 if (typeof data === 'string' && (data.trim().startsWith('{') || data.trim().startsWith('['))) {
                     try {
                         responseData = JSON.parse(data);
-                        console.log('Parsed JSON string:', responseData);
-                    } catch (e) {
-                        console.log('Not a JSON string, keeping as is');
-                    }
+                    } catch (e) {}
                 }
                 
-                // Extract the response text
                 let botResponse = '';
                 if (typeof responseData === 'string') {
                     botResponse = responseData;
@@ -969,20 +975,37 @@
                     botResponse = JSON.stringify(responseData, null, 2);
                 }
                 
-                // Add user message (successful)
-                addMessage(message, true, imagesToSend, messageId, false);
+                // Find the pending user message and remove pending class
+                const pendingMsg = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (pendingMsg) {
+                    pendingMsg.classList.remove('pending');
+                }
                 
-                // Add bot response
+                // Add bot response with copy button
                 addMessage(botResponse, false);
 
             } catch (error) {
                 console.error('Error:', error);
                 removeTypingIndicator();
                 
-                // Add user message with retry button (failed)
-                addMessage(message, true, imagesToSend, messageId, true);
+                // Mark the pending message as failed and add retry button
+                const failedMsg = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (failedMsg) {
+                    failedMsg.classList.remove('pending');
+                    // Add retry button to failed message
+                    const wrapper = failedMsg.querySelector('.message-wrapper');
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'message-actions';
+                    
+                    const retryBtn = document.createElement('button');
+                    retryBtn.className = 'retry-btn';
+                    retryBtn.innerHTML = '↻ Retry';
+                    retryBtn.onclick = () => retryMessage(message, imagesToSend, messageId);
+                    
+                    actionsDiv.appendChild(retryBtn);
+                    wrapper.appendChild(actionsDiv);
+                }
                 
-                // Show error status briefly
                 status.textContent = 'Failed to send. Click retry to try again.';
                 status.classList.add('active');
                 setTimeout(() => {
@@ -991,23 +1014,11 @@
                 }, 3000);
                 
             } finally {
-                // Re-enable input and button
                 userInput.disabled = false;
                 sendButton.disabled = false;
                 userInput.focus();
             }
         }
-
-        // Handle Enter key (Shift+Enter for new line, Enter to send)
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Initial focus
-        userInput.focus();
 
         // Auto-resize textarea
         userInput.addEventListener('input', function() {
@@ -1015,7 +1026,11 @@
             this.style.height = (this.scrollHeight) + 'px';
         });
 
-        // Update workflow info
+        // No Enter key handler - rely on Send button for all platforms
+        // This allows mobile return key to insert new line naturally
+
+        userInput.focus();
+
         document.querySelector('.workflow-info span:last-child').textContent = 'Ready';
     </script>
 </body>
