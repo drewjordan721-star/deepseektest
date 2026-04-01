@@ -43,32 +43,43 @@ body {
 
 #input-container {
     display: flex;
-    padding: 15px;
+    padding: 10px;
     background: #40414f;
+    align-items: center;
+    gap: 10px;
 }
 
 #input {
     flex: 1;
-    padding: 14px;
+    padding: 12px;
     border-radius: 10px;
     border: none;
     outline: none;
-    font-size: 16px;
 }
 
 button {
-    margin-left: 10px;
-    padding: 14px 20px;
+    padding: 10px 16px;
     border: none;
     border-radius: 10px;
     background-color: #19c37d;
     color: white;
     cursor: pointer;
-    font-size: 16px;
 }
 
 button:hover {
     background-color: #17a96b;
+}
+
+#fileInput {
+    display: none;
+}
+
+.upload-btn {
+    background: #555;
+}
+
+.upload-btn:hover {
+    background: #666;
 }
 </style>
 </head>
@@ -78,6 +89,8 @@ button:hover {
 <div id="chat-container"></div>
 
 <div id="input-container">
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📎</button>
+    <input type="file" id="fileInput" />
     <input id="input" type="text" placeholder="Send a message..." />
     <button onclick="sendMessage()">Send</button>
 </div>
@@ -85,9 +98,12 @@ button:hover {
 <script>
 const chatContainer = document.getElementById('chat-container');
 const input = document.getElementById('input');
+const fileInput = document.getElementById('fileInput');
 
-// ✅ YOUR N8N AI AGENT URL (ALREADY SET)
 const API_URL = "https://bayal.app.n8n.cloud/webhook/e9500a33-2854-4c10-88e6-b38a5bd888ff/chat";
+
+let uploadedFileBase64 = null;
+let uploadedFileName = null;
 
 function addMessage(text, sender) {
     const div = document.createElement('div');
@@ -97,11 +113,28 @@ function addMessage(text, sender) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// Convert file to Base64
+fileInput.addEventListener('change', function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    uploadedFileName = file.name;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+        uploadedFileBase64 = reader.result.split(',')[1];
+        addMessage("📎 File attached: " + file.name, 'user');
+    };
+    reader.readAsDataURL(file);
+});
+
 async function sendMessage() {
     const message = input.value.trim();
-    if (!message) return;
 
-    addMessage(message, 'user');
+    if (!message && !uploadedFileBase64) return;
+
+    if (message) addMessage(message, 'user');
+
     input.value = '';
 
     const loading = document.createElement('div');
@@ -116,7 +149,9 @@ async function sendMessage() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                chatInput: message
+                chatInput: message,
+                file: uploadedFileBase64,
+                fileName: uploadedFileName
             })
         });
 
@@ -124,10 +159,14 @@ async function sendMessage() {
 
         chatContainer.removeChild(loading);
 
-        // n8n AI Agent usually returns this:
         const reply = data.output || data.reply || JSON.stringify(data);
 
         addMessage(reply, 'bot');
+
+        // Reset file after sending
+        uploadedFileBase64 = null;
+        uploadedFileName = null;
+        fileInput.value = "";
 
     } catch (error) {
         chatContainer.removeChild(loading);
@@ -136,7 +175,7 @@ async function sendMessage() {
     }
 }
 
-// Enter key support
+// Enter key
 input.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
         sendMessage();
